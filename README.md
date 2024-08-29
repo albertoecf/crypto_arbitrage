@@ -8,7 +8,7 @@ This project is designed to be modular and scalable, leveraging enterprise integ
 
 ## Messaging System Architecture
 
-![Messaging System Diagram](path_to_diagram.png)  
+![Messaging System Diagram](media/message_diagram.png)  
 *Diagram of the messaging system architecture will be displayed here.*
 
 ## Development Phases with Messaging
