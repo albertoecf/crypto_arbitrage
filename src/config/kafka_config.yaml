@@ -1,0 +1,13 @@
+# Kafka Broker Configuration
+bootstrap_servers: 'localhost:9092'  # Address of the Kafka broker
+
+# Kafka Topics
+topics:
+  market_data_topic: 'market_data'      # Topic name for market data
+  trade_orders_topic: 'trade_orders'    # Topic name for trade orders
+  trade_results_topic: 'trade_results'  # Topic name for trade results
+
+# Consumer Group IDs
+consumer_groups:
+  arbitrage_detector_group: 'arbitrage-detector-group'  # Group ID for arbitrage detection
+  trade_executor_group: 'trade-executor-group'          # Group ID for trade execution
