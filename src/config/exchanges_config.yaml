@@ -1,13 +1,12 @@
 # Binance Exchange Configuration
 binance:
-  api_key: 'your_binance_api_key'       # Your Binance API key
-  secret: 'your_binance_api_secret'     # Your Binance API secret
-  symbol: 'BTC/USDT'                    # Trading pair to monitor
+  symbols:                             # List of trading pairs to monitor
+    - 'BTC/USDT'
+    - 'ETH/USDT'
+    - 'LTC/USDT'
 
 # Kraken Exchange Configuration
-kraken:
-  api_key: 'your_kraken_api_key'        # Your Kraken API key
-  secret: 'your_kraken_api_secret'      # Your Kraken API secret
-  symbol: 'BTC/USD'                     # Trading pair to monitor
+#kraken:
+#  symbol: 'BTC/USD'                     # Trading pair to monitor
 
 # Other exchanges can be added in a similar manner
