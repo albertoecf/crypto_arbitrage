@@ -1,4 +1,5 @@
-import ccxt
+import asyncio
+import ccxt.async_support as ccxt  # Use the async support version of ccxt
 import yaml
 from pathlib import Path
 import datetime
@@ -14,41 +15,53 @@ with open(config_dir / 'exchanges_config.yaml', 'r') as file:
 # Mapping of exchange credentials
 exchange_credentials = {
     'binance': {'api_key': BINANCE_API_KEY, 'secret': BINANCE_SECRET},
-    # 'kraken': {'api_key': KRAKEN_API_KEY, 'secret': KRAKEN_SECRET},
+    # Add more exchange credentials here if needed
 }
 
 
-def fetch_market_data(exchange_id, symbol):
+async def fetch_market_data(exchange_id, symbol):
     try:
         # Initialize the exchange with API credentials from settings
-        exchange = getattr(ccxt, exchange_id)({
+        async with getattr(ccxt, exchange_id)({
             'apiKey': exchange_credentials[exchange_id]['api_key'],
-            'secret': exchange_credentials[exchange_id]['secret']
-        })
+            'secret': exchange_credentials[exchange_id]['secret'],
+            'enableRateLimit': True
+        }) as exchange:
 
-        # Fetch the ticker data for the specified symbol
-        ticker = exchange.fetch_ticker(symbol)
+            # Fetch the ticker data for the specified symbol asynchronously
+            ticker = await exchange.fetch_ticker(symbol)
 
-        # Create a formatted data structure
-        data = {
-            'exchange': exchange_id,
-            'symbol': symbol,
-            'price': ticker['last'],
-            'bid': ticker['bid'],
-            'ask': ticker['ask'],
-            'timestamp': datetime.datetime.utcfromtimestamp(ticker['timestamp'] / 1000).isoformat() if ticker[
-                'timestamp'] else 'N/A'
-        }
+            # Create a formatted data structure
+            data = {
+                'exchange': exchange_id,
+                'symbol': symbol,
+                'price': ticker['last'],
+                'bid': ticker['bid'],
+                'ask': ticker['ask'],
+                'timestamp': datetime.datetime.utcfromtimestamp(ticker['timestamp'] / 1000).isoformat() if ticker[
+                    'timestamp'] else 'N/A'
+            }
 
-        # Print the data to the console for testing
-        print(data)
-        return data
+            # Print the data to the console for testing
+            print(data)
+            return data
 
     except Exception as e:
         print(f"Error fetching data from {exchange_id}: {e}")
 
 
+async def main():
+    tasks = []
+
+    # Iterate over the exchanges in the configuration file
+    for exchange_id, config in exchange_config.items():
+        # Iterate over each trading pair (symbol) for the given exchange
+        for symbol in config['symbols']:
+            tasks.append(fetch_market_data(exchange_id, symbol))
+
+    # Run all tasks concurrently
+    await asyncio.gather(*tasks)
+
+
 if __name__ == "__main__":
-    # Example: Fetch data for BTC/USDT from Binance
-    fetch_market_data('binance', exchange_config['binance']['symbol'])
-    # Add more exchanges and symbols as needed
+    asyncio.run(main())

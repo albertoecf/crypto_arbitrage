@@ -1,6 +1,9 @@
 # Binance Exchange Configuration
 binance:
-  symbol: 'BTC/USDT'                    # Trading pair to monitor
+  symbols:                             # List of trading pairs to monitor
+    - 'BTC/USDT'
+    - 'ETH/USDT'
+    - 'LTC/USDT'
 
 # Kraken Exchange Configuration
 #kraken:
