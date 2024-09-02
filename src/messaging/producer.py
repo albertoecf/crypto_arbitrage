@@ -1,42 +1,74 @@
 import asyncio
+import ccxt.async_support as ccxt
+import yaml
+from pathlib import Path
+import datetime
 from aiokafka import AIOKafkaProducer
 import json
+from src.settings import BINANCE_API_KEY, BINANCE_SECRET
+
+# Load configuration files
+base_dir = Path(__file__).resolve().parent.parent
+config_dir = base_dir / 'config'
+
+with open(config_dir / 'exchanges_config.yaml', 'r') as file:
+    exchange_config = yaml.safe_load(file)
+
+# Mapping of exchange credentials
+exchange_credentials = {
+    'binance': {'api_key': BINANCE_API_KEY, 'secret': BINANCE_SECRET},
+    # Add more exchange credentials here if needed
+}
 
 
-async def send_one_message(producer, topic, message):
-    """Send a single message to the Kafka topic."""
+async def fetch_market_data(exchange_id, symbol):
+    """Fetch market data from the exchange."""
     try:
-        print(f"Publishing message: {message}")
-        await producer.send_and_wait(topic, json.dumps(message).encode('utf-8'))
+        async with getattr(ccxt, exchange_id)({
+            'apiKey': exchange_credentials[exchange_id]['api_key'],
+            'secret': exchange_credentials[exchange_id]['secret'],
+            'enableRateLimit': True
+        }) as exchange:
+            ticker = await exchange.fetch_ticker(symbol)
+            data = {
+                'exchange': exchange_id,
+                'symbol': symbol,
+                'price': ticker['last'],
+                'bid': ticker['bid'],
+                'ask': ticker['ask'],
+                'timestamp': datetime.datetime.utcfromtimestamp(ticker['timestamp'] / 1000).isoformat() if ticker[
+                    'timestamp'] else 'N/A'
+            }
+            print(data)
+            return data
     except Exception as e:
-        print(f"Failed to send message: {e}")
+        print(f"Error fetching data from {exchange_id}: {e}")
+        return None
 
 
-async def produce_messages():
-    # Initialize Kafka producer
-    producer = AIOKafkaProducer(
-        bootstrap_servers='localhost:9092'
-    )
+async def produce_messages(producer):
+    """Produce messages to Kafka."""
+    tasks = []
 
-    # Start the producer
+    for exchange_id, config in exchange_config.items():
+        for symbol in config['symbols']:
+            tasks.append(fetch_market_data(exchange_id, symbol))
+
+    market_data_list = await asyncio.gather(*tasks)
+
+    for market_data in market_data_list:
+        if market_data:
+            await producer.send_and_wait('market-data-topic', json.dumps(market_data).encode('utf-8'))
+
+
+async def main():
+    producer = AIOKafkaProducer(bootstrap_servers='localhost:9092')
     await producer.start()
     try:
-        # Define the topic and messages
-        topic = 'test-topic'
-        messages = [
-            {"message": "Hello Kafka!"},
-            {"message": "Kafka is great!"},
-            {"message": "Python and Kafka are working together!"}
-        ]
-
-        # Send messages to the Kafka topic
-        for message in messages:
-            await send_one_message(producer, topic, message)
-            await asyncio.sleep(1)  # Sleep for a second between messages for demo purposes
+        await produce_messages(producer)
     finally:
-        # Stop the producer
         await producer.stop()
 
 
 if __name__ == "__main__":
-    asyncio.run(produce_messages())
+    asyncio.run(main())

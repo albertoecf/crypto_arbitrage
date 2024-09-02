@@ -4,23 +4,21 @@ import json
 
 
 async def consume_messages():
-    # Initialize Kafka consumer
     consumer = AIOKafkaConsumer(
-        'test-topic',
+        'market-data-topic',
         bootstrap_servers='localhost:9092',
-        group_id='my-group',
+        group_id='market-data-group',
         auto_offset_reset='earliest',
         value_deserializer=lambda x: json.loads(x.decode('utf-8'))
     )
 
-    # Start the consumer
     await consumer.start()
     try:
-        print("Listening for messages...")
+        print("Listening for market data messages...")
         async for message in consumer:
-            print(f"Received message: {message.value}")
+            market_data = message.value
+            print(f"Received market data: {market_data}")
     finally:
-        # Stop the consumer
         await consumer.stop()
 
 
