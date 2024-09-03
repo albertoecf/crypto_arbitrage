@@ -5,7 +5,7 @@ from pathlib import Path
 import datetime
 from aiokafka import AIOKafkaProducer
 import json
-from src.settings import BINANCE_API_KEY, BINANCE_SECRET
+from src.settings import BINANCE_API_KEY, BINANCE_SECRET, KRAKEN_API_KEY, KRAKEN_SECRET
 
 # Load configuration files
 base_dir = Path(__file__).resolve().parent.parent
@@ -17,7 +17,7 @@ with open(config_dir / 'exchanges_config.yaml', 'r') as file:
 # Mapping of exchange credentials
 exchange_credentials = {
     'binance': {'api_key': BINANCE_API_KEY, 'secret': BINANCE_SECRET},
-    # Add more exchange credentials here if needed
+    'kraken': {'api_key': KRAKEN_API_KEY, 'secret': KRAKEN_SECRET},
 }
 
 
