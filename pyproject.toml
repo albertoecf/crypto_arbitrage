@@ -11,6 +11,8 @@ pyyaml = "^6.0.2"
 ccxt = "^4.3.91"
 python-dotenv = "^1.0.1"
 aiokafka = "^0.11.0"
+pydantic = "^2.8.2"
+six = "^1.16.0"
 
 
 [build-system]
