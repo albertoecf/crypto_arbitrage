@@ -6,19 +6,14 @@ async def main():
     # Initialize the ExchangeDataFetcher
     fetcher = ExchangeDataFetcher()
 
-    # Fetch market data from various exchanges
-    binance_data = await fetcher.fetch_data('binance', 'BTC/USDT')
-
-    # Uncomment these lines to fetch data from Kraken and the new exchange
-    kraken_data = await fetcher.fetch_data('kraken', 'BTC/USD')
-    # new_exchange_data = await fetcher.fetch_data('new_exchange', 'BTC/USDT')
+    # Fetch market data from various exchanges and their trading pairs
+    market_data = await fetcher.fetch_data()
 
     # Print the fetched data
-    print("Binance Data:", binance_data)
-
-    # Uncomment these lines to print the fetched data from Kraken and the new exchange
-    print("Kraken Data:", kraken_data)
-    # print("New Exchange Data:", new_exchange_data)
+    for exchange, data in market_data.items():
+        print(f"Data for {exchange}:")
+        for symbol, info in data.items():
+            print(f"  {symbol}: {info}")
 
     # Close all connections to exchanges
     await fetcher.close_all()

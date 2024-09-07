@@ -1,0 +1,13 @@
+# Binance Exchange Configuration
+binance:
+  symbols:
+    - 'BTC/USDT'
+    - 'ETH/USDT'
+    - 'LTC/USDT'
+
+# Kraken Exchange Configuration
+kraken:
+  symbols:
+    - 'BTC/USDT'
+    - 'ETH/USD'
+    - 'LTC/USD'
