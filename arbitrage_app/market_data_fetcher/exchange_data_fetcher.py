@@ -1,8 +1,8 @@
 # exchange_data_fetcher.py
 from arbitrage_app.market_data_fetcher.BinanceFetcher import BinanceFetcher
+from arbitrage_app.market_data_fetcher.KrakenFetcher import KrakenFetcher
 
 
-# from arbitrage_app.market_data_fetcher.KrakenFetcher import KrakenFetcher
 # from arbitrage_app.market_data_fetcher.NewExchangeFetcher import NewExchangeFetcher
 
 
@@ -15,7 +15,7 @@ class ExchangeDataFetcher:
         # Initialize fetcher instances for each supported exchange
         self.fetchers = {
             'binance': BinanceFetcher(),
-            # 'kraken': KrakenFetcher(),
+            'kraken': KrakenFetcher(),
             # 'new_exchange': NewExchangeFetcher(),
         }
 
