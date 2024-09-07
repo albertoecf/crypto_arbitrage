@@ -93,27 +93,6 @@ system.
 The Component Diagram focuses on the internal components within the Arbitrage Detector container, detailing the
 individual modules and how they interact.
 
-#### Message Channel
-
-```
-+--------------------------------------+
-|            Message Channel           |
-|--------------------------------------|
-|                                      |
-| + KafkaProducer                      |
-|  |----------------------------------| 
-|  | Produces messages to Kafka       |
-|  | topics (e.g., NEW_TRADING_PAIR)  |
-| +-----------------------------------|
-|                                      |
-| + KafkaConsumer                      |
-|  |----------------------------------| 
-|  | Consumes messages from Kafka     |
-|  | topics                           |
-| +-----------------------------------|
-+--------------------------------------+
-```
-
 #### Market Data Fetcher
 
 ```
@@ -181,6 +160,27 @@ individual modules and how they interact.
 +--------------------------------------+
 ```
 
+#### Message Channel
+
+```
++--------------------------------------+
+|            Message Channel           |
+|--------------------------------------|
+|                                      |
+| + KafkaProducer                      |
+|  |----------------------------------| 
+|  | Produces messages to Kafka       |
+|  | topics (e.g., NEW_TRADING_PAIR)  |
+| +-----------------------------------|
+|                                      |
+| + KafkaConsumer                      |
+|  |----------------------------------| 
+|  | Consumes messages from Kafka     |
+|  | topics                           |
+| +-----------------------------------|
++--------------------------------------+
+```
+
 #### Aggregator
 
 ```
@@ -206,48 +206,41 @@ individual modules and how they interact.
 #### Arbitrage Detector
 
 ```
-+----------------------------------+
-|        Arbitrage Detector        |
-|----------------------------------|
-|                                  |
-| +-----------------------------+  |
-| | Content-Based Router        |  |
-| |-----------------------------|  |
-| | Routes messages by trading  |  |
-| | pair symbol to Aggregator   |  |
-| +-------------+---------------+  |
-|               |                  |
-|               v                  |
-| +-----------------------------+  |
-| | Aggregator                  |  |
-| |-----------------------------|  |
-| | Collects and aggregates     |  |
-| | market data from different  |  |
-| | exchanges for comparison    |  |
-| +-------------+---------------+  |
-|               |                  |
-|               v                  |
-| +-----------------------------+  |
-| | Filter                      |  |
-| |-----------------------------|  |
-| | Detects arbitrage           |  |
-| | opportunities by comparing  |  |
-| | prices                      |  |
-| +-----------------------------+  |
-+----------------------------------+
++--------------------------------------+
+|               Aggregator             |
+|--------------------------------------|
+|                                      |
+| + AggregatorService                  |
+|  |----------------------------------| 
+|  | Collects and stores market data  |
+|  | from different exchanges by      |
+|  | trading pair                     |
+| +-----------------------------------|
+|                                      |
+| + MessageStorage                     |
+|  |----------------------------------| 
+|  | Stores the latest messages for   |
+|  | each trading pair and exchange   |
+| +-----------------------------------|
+|                                      |
+| + is_ready(symbol: str) -> bool      |  <-- Checks if data for a symbol is ready
+|                                      |
+| + get_aggregated_data(symbol: str)   |  <-- Retrieves aggregated data for comparison
+|   -> dict                            |
++--------------------------------------+
 ```
 
 #### Filter
 
 ```
 +--------------------------------------+
-|                  Filter              |
+|                 Filter               |
 |--------------------------------------|
 |                                      |
 | + ArbitrageDetector                  |
 |  |----------------------------------| 
-|  | Main class for detecting arbitrage|
-|  | by comparing prices across       |
+|  | Detects arbitrage opportunities  |
+|  | by comparing prices from         |
 |  | different exchanges              |
 | +-----------------------------------|
 |                                      |
