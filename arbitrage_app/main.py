@@ -20,10 +20,4 @@ async def main():
 
 
 if __name__ == '__main__':
-    try:
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(main())
-    except Exception as e:
-        print(f"Exception occurred: {e}")
-    finally:
-        loop.close()
+    asyncio.run(main())

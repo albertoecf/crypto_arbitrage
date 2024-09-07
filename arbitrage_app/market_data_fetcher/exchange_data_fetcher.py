@@ -1,8 +1,7 @@
 # exchange_data_fetcher.py
 
-from arbitrage_app.market_data_fetcher.BinanceFetcher import BinanceFetcher
-from arbitrage_app.market_data_fetcher.KrakenFetcher import KrakenFetcher
 from arbitrage_app.utils.config_reader import load_exchange_config
+import importlib
 
 
 class ExchangeDataFetcher:
@@ -11,15 +10,37 @@ class ExchangeDataFetcher:
     """
 
     def __init__(self):
-        # Load exchanges and their symbols from configuration file
+        # Load exchanges and their symbols from the configuration file
         self.exchange_config = load_exchange_config()
 
-        # Initialize fetcher instances for each supported exchange
-        self.fetchers = {
-            'binance': BinanceFetcher(),
-            'kraken': KrakenFetcher(),
-            # Add more fetchers here as needed
-        }
+        # Initialize fetcher instances for each supported exchange dynamically
+        self.fetchers = {}
+        for exchange_id, config in self.exchange_config.items():
+            fetcher_class_name = config.get('exchange_class')
+            if fetcher_class_name:
+                # Dynamically load the fetcher class based on the config
+                fetcher_class = self._get_fetcher_class(fetcher_class_name)
+                if fetcher_class:
+                    self.fetchers[exchange_id] = fetcher_class()
+
+    def _get_fetcher_class(self, class_name):
+        """
+        Dynamically loads a fetcher class based on its name.
+
+        Args:
+            class_name (str): Name of the fetcher class.
+
+        Returns:
+            class: The fetcher class or None if not found.
+        """
+        try:
+            # Dynamically import the module containing the fetcher class
+            module_name = f'arbitrage_app.market_data_fetcher.{class_name}'
+            module = importlib.import_module(module_name)
+            return getattr(module, class_name)
+        except (ImportError, AttributeError) as e:
+            print(f"Error loading fetcher class '{class_name}': {e}")
+            return None
 
     async def fetch_data(self):
         """

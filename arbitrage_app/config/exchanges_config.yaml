@@ -1,5 +1,6 @@
 # Binance Exchange Configuration
 binance:
+  exchange_class: 'BinanceFetcher'
   symbols:
     - 'BTC/USDT'
     - 'ETH/USDT'
@@ -7,7 +8,16 @@ binance:
 
 # Kraken Exchange Configuration
 kraken:
+  exchange_class: 'KrakenFetcher'
   symbols:
     - 'BTC/USDT'
     - 'ETH/USD'
     - 'LTC/USD'
+
+# ExampleExchange Configuration
+#example_exchange:
+#  exchange_class: 'ExampleExchangeFetcher'
+#  symbols:
+#    - 'BTC/USDT'
+#    - 'ETH/USDT'
+#    - 'ADA/USDT'
