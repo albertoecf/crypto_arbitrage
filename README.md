@@ -15,30 +15,20 @@ Kafka message queues, ensuring flexibility and resilience.
 ![Messaging System Diagram](media/message_diagram.png)  
 *Diagram of the messaging system architecture will be displayed here.*
 
-## Development Phases with Messaging
-
-### Phase 1: Setup and Market Data Collection
-
-- Set up a Kafka server on the cloud.
-- Implement a script to fetch real-time market data and publish it to the `market_data` queue. (We will use Cron Jobs to
-  run it huorly)
-
-### Phase 2: Arbitrage Detection
-
-- Develop a consumer script that listens to the `market_data` queue, processes the data, and publishes potential trade
-  opportunities to the `trade_orders` queue.
-
-### Phase 3: Trade Execution
-
-- Create a consumer script to listen to the `trade_orders` queue and execute trades based on the messages received.
-
-### Phase 4: Logging and Reporting
-
-- Implement a logging system to record trade results and generate performance reports.
-
-### Phase 5: Testing and Refinement
-
-- Test the system end-to-end with messaging in place and refine the logic to ensure seamless operation.
+1. We will have different point to point channels, for exchange fetching (Binance, Kraken, New Exchanges..). This
+   channels are private to only the related applications (so far, the message translator for each echange)
+2. For each exchange, we will have a Message Translator to format the incoming data format into our desired "
+   NEW_TRADING_PAIR" format
+3. We will have public Data Type Channel, is meant to be used by different applications but only accepts specific
+   Canonical Data Model, called NEW_TRADING_PAIR .
+4. The Aggregator combines the results from the different exchanges and passes the resulting message to a filter
+   channel.Waits until it has received the latest data from all relevant exchanges for each trading pair.
+5. Filter: Compares prices between exchanges to detect arbitrage opportunities.
+6. Publish-Subscribe Channel (ARBITRAGE_OPPORTUNITIES): A channel that broadcasts detected arbitrage opportunities for
+   further processing by different consumers.
+7. Consumers (Logging System, Trading Executor):
+   • Logging System logs detected opportunities.
+   • Trading Executor executes trades based on the detected opportunities.
 
 ## Tools and Libraries
 
@@ -52,14 +42,8 @@ Kafka message queues, ensuring flexibility and resilience.
 ## Final Deliverable
 
 The final deliverable is a modular trading bot with components communicating via Kafka message queues, ensuring
-flexibility, scalability, and resilience.
+flexibility, scalability, and resilience. Which is able to detect arbitrage opportunities across different exchanges
 
-## Project Structure
+## Discussion points
 
-- **Modular project structure** to organize core functionality, configurations, data, and scripts efficiently.
-    - `src/arbitrage/`: Contains the core scripts for fetching market data, detecting arbitrage opportunities, executing
-      trades, and logging/reporting.
-    - `src/config/`: Houses configuration files for Kafka (`kafka_config.yaml`) and exchange
-      APIs (`exchanges_config.yaml`).
-    - `src/data/`: Directory to store logs and generated performance reports.
-    - `src/scripts/`: Contains utility scripts, such as `run_hourly.sh` for scheduling tasks.
+1. Should we Implement topics within NEW_TRADING_PAIR channel
